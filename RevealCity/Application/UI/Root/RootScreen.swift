@@ -18,12 +18,16 @@ struct RootScreen<ViewModel: RootViewModel>: View {
     
     var body: some View {
         start()
+            .withSlpashScreen(isShow: $vm.isSplashShow)
+            .onAppear {
+                vm.onApepar()
+            }
     }
     
     @ViewBuilder
     private func start() -> some View {
         if vm.isOnboardingShown {
-            EmptyView()
+            vm.onboardingFlow()
         } else {
             EmptyView()
         }
