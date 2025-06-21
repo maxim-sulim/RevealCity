@@ -7,7 +7,7 @@
 
 @MainActor
 protocol RootContainer {
-    
+    func makeOnboardingAssembly() -> OnboardingAssembly
 }
 
 @MainActor

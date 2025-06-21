@@ -32,11 +32,34 @@ final class AppContainer: ObservableObject {
 
 extension AppContainer {
     func makeRootAssembly() -> RootAssembly {
-        RootAssembly(container: self)
+        .init(container: self)
     }
-    
 }
 
 extension AppContainer: RootContainer {
+    func makeOnboardingAssembly() -> OnboardingAssembly {
+        .init(container: self)
+    }
+}
+
+extension AppContainer: OnboardingContainer {
+    func makeAppStateManager() -> any OnboardingStateInterface {
+        getWeak {
+            ApplicationStateManager()
+        }
+    }
+    
+    func makeNotificationManager() -> any NotificationManager {
+        getWeak {
+            NotificationManagerImpl()
+        }
+    }
+    
+    func makeLocationService() -> any LocationService {
+        getWeak {
+            LocationServiceImpl()
+        }
+    }
+    
     
 }
