@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct RevealCityApp: App {
+    
+    @StateObject var appContainer = AppContainer()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            appContainer.makeRootAssembly().view()
         }
     }
 }
