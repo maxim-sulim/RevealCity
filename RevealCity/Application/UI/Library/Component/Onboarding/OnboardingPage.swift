@@ -12,7 +12,7 @@ struct OnboardingPage: View {
     
     var body: some View {
         VStack(spacing: 32) {
-            Image(systemName: model.icon)
+            Image(systemName: model.icon.rawValue)
                 .font(.system(size: 80))
                 .foregroundStyle(model.color)
             

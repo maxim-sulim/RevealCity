@@ -23,3 +23,13 @@ extension UIApplication {
             .first { $0.isKeyWindow }
     }
 }
+
+extension UIApplication {
+    
+    func showSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url)
+        }
+    }
+}

@@ -19,11 +19,12 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
     var body: some View {
         ZStack {
             Color.white.ignoresSafeArea()
-            VStack(spacing: 40) {
+            VStack(spacing: 20) {
                 header
                 
                 TabView(selection: $vm.currentPage, content: pages)
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    .frame(maxHeight: .infinity, alignment: .center)
                     .animation(.default, value: vm.currentPage)
                 
                 nextButton
@@ -32,16 +33,16 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.vertical, 40)
             .safeAreaInset(edge: .bottom) {
-                PolicyView(policyTapped: vm.politicTapped(_:))
+                PolicyView { politic in
+                    vm.dispatch(.politicTapped(politic))
+                }
             }
         }
         .overlay {
             PermissionPage(isNotificationGranted: $vm.isNotificationGranted,
                            isLocationGranted: $vm.isLocationGranted,
-                           onLocationPerTapped: vm.locationPermTapped,
-                           onNotificationPerTapped: vm.notificationPermTapped,
-                           onNextTapped: vm.closePermissionView,
-                           onTapPolicit: vm.politicTapped(_:))
+                           inputModel: vm.inputModel.permissionPageInput,
+                           onDispatch: vm.dispatch(_:))
             .opacity(vm.isShowPermissionView ? 1 : 0)
             .transition(.opacity)
         }
@@ -49,7 +50,7 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
     
     @ViewBuilder
     private func pages() -> some View {
-        ForEach(vm.pagesOnboard, id: \.self) { page in
+        ForEach(vm.inputModel.onboarding, id: \.self) { page in
             OnboardingPage(model: page.inputModel)
                 .onAppear {
                     playHaptic(.light)
@@ -59,12 +60,12 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
     
     private var header: some View {
         VStack(spacing: 16) {
-            Text("Welcome to Loccator")
+            Text(vm.inputModel.title)
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
             
-            Text("Your personal city exploration companion")
+            Text(vm.inputModel.subtitle)
                 .font(.body)
                 .foregroundStyle(.labelPrim)
                 .multilineTextAlignment(.center)
@@ -74,7 +75,7 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
     private var nextButton: some View {
         VStack(spacing: 12) {
             Button(vm.titleButton) {
-                vm.nextTapped()
+                vm.dispatch(.nextTapped)
             }
             .buttonStyle(.baseRounded)
         }

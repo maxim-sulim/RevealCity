@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import UIKit.UIApplication
 
 protocol LocationService {
     var isLocationEnabledPublisher: Published<Bool>.Publisher { get }
@@ -51,6 +52,7 @@ final class LocationServiceImpl: NSObject, LocationService {
             locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
             logger.log("Error: Location services are not authorized")
+            UIApplication.shared.showSettings()
         case .authorizedAlways, .authorizedWhenInUse:
             isLocationEnabled = true
         @unknown default:
@@ -67,6 +69,6 @@ extension LocationServiceImpl: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        checkIfLocationServicesEnabled()
+        checlLocationAuthorizationStatus()
     }
 }
