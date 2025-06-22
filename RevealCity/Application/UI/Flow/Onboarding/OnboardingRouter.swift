@@ -23,11 +23,11 @@ final class OnboardRouter: ObservableObject {
         PoliticScreen(configuration: politic)
     }
     
-    func makeRootScreen() -> OnboardingScreen<OnboardingViewModel> {
-        return OnboardingScreen(vm: OnboardingViewModel(coordinator: self,
-                                                        appStateManager: self.container.makeAppStateManager(),
-                                                        notificationManager: self.container.makeNotificationManager(),
-                                                        locationService: self.container.makeLocationService()))
+    func makeRootScreen() -> OnboardingScreen<OnboardingViewModelImpl> {
+        return OnboardingScreen(vm: OnboardingViewModelImpl(coordinator: self,
+                                                            appStateManager: self.container.makeAppStateManager(),
+                                                            notificationManager: self.container.makeNotificationManager(),
+                                                            locationService: self.container.makeLocationService()))
     }
 }
 

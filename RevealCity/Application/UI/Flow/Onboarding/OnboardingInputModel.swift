@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct OnboardingInputModel {
-    var onboarding: [Onboarding]
+    var pages: [Onboarding]
     var title: String
     var subtitle: String
     var titleNextButton: String
@@ -19,7 +19,7 @@ struct OnboardingInputModel {
 
 extension OnboardingInputModel {
     init(_ permissionInput: PermissionPageInputModel = .init()) {
-        onboarding = Onboarding.allCases
+        pages = Onboarding.allCases
         title = "Welcome to Loccator"
         subtitle = "Your personal city exploration companion"
         titleNextButton = "Next"
@@ -50,11 +50,11 @@ extension PermissionPageInputModel {
     }
 }
 
-enum Onboarding: Int, CaseIterable {
+enum Onboarding: String, RawRepresentable, CaseIterable, Identifiable, Equatable {
     case page1, page2, page3
     
     var id: String {
-        UUID().uuidString
+        rawValue
     }
     
     var inputModel: PageModel {
@@ -66,8 +66,14 @@ enum Onboarding: Int, CaseIterable {
     }
 }
 
-struct PageModel: Hashable, Identifiable {
-    var id: UUID = UUID()
+extension Onboarding {
+    static func == (lhs: Onboarding, rhs: Onboarding) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+struct PageModel: Identifiable, Hashable {
+    var id: String
     let icon: SystemIcon
     let title: String
     let description: String
@@ -76,6 +82,7 @@ struct PageModel: Hashable, Identifiable {
 
 extension PageModel {
     init(from configure: Onboarding) {
+        id = configure.rawValue
         switch configure {
         case .page1:
             icon = .walk

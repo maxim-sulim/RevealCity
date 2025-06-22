@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
+struct OnboardingScreen<ViewModel: OnboardingViewModelInterface>: View {
     
     @StateObject private var vm: ViewModel
     
@@ -25,11 +25,16 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
                 TabView(selection: $vm.currentPage, content: pages)
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                     .frame(maxHeight: .infinity, alignment: .center)
-                    .animation(.default, value: vm.currentPage)
                 
-                nextButton
-                    .padding(.horizontal, 24)
+                VStack(spacing: 22) {
+                    PageControl(pages: vm.inputModel.pages,
+                                current: $vm.currentPage)
+                    
+                    nextButton
+                        .padding(.horizontal, 24)
+                }
             }
+            .animation(.default, value: vm.currentPage)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.vertical, 40)
             .safeAreaInset(edge: .bottom) {
@@ -50,7 +55,7 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
     
     @ViewBuilder
     private func pages() -> some View {
-        ForEach(vm.inputModel.onboarding, id: \.self) { page in
+        ForEach(vm.inputModel.pages, id: \.self) { page in
             OnboardingPage(model: page.inputModel)
                 .onAppear {
                     playHaptic(.light)
@@ -84,9 +89,9 @@ struct OnboardingScreen<ViewModel: OnboardingViewModel>: View {
 
 #Preview {
     let router = OnboardRouter(container: AppContainer(isPreview: true))
-    let vm = OnboardingViewModel(coordinator: router,
-                                 appStateManager: AppStateManagerMock(),
-                                 notificationManager: NotificationManagerMock(),
-                                 locationService: LocationSerivceMock())
+    let vm = OnboardingViewModelImpl(coordinator: router,
+                                     appStateManager: AppStateManagerMock(),
+                                     notificationManager: NotificationManagerMock(),
+                                     locationService: LocationSerivceMock())
     OnboardingScreen(vm: vm)
 }

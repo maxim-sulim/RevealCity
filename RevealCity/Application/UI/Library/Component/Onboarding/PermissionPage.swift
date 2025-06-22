@@ -13,12 +13,12 @@ struct PermissionPage: View {
     @Binding var isNotificationGranted: Bool
     @Binding var isLocationGranted: Bool
     
-    private var onDispatch: (OnboardingViewModel.Event) -> Void
+    private var onDispatch: (OnboardingViewModelImpl.Event) -> Void
     
     init(isNotificationGranted: Binding<Bool>,
          isLocationGranted: Binding<Bool>,
          inputModel: PermissionPageInputModel,
-         onDispatch: @escaping (OnboardingViewModel.Event) -> Void) {
+         onDispatch: @escaping (OnboardingViewModelImpl.Event) -> Void) {
         _isNotificationGranted = isNotificationGranted
         _isLocationGranted = isLocationGranted
         self.inputModel = inputModel

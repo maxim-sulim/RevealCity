@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 @MainActor
-protocol OnboardViewModelIntarface: ObservableObject {
+protocol OnboardingViewModelInterface: ObservableObject {
     
     var isLocationGranted: Bool { get set }
     var isNotificationGranted: Bool { get set }
@@ -19,7 +19,7 @@ protocol OnboardViewModelIntarface: ObservableObject {
     var inputModel: OnboardingInputModel { get }
     var titleButton: String { get }
     
-    func dispatch(_ event: OnboardingViewModel.Event)
+    func dispatch(_ event: OnboardingViewModelImpl.Event)
 }
 
 @MainActor
@@ -29,7 +29,7 @@ protocol OnboardingCoordinatorDelegate: Any {
 }
 
 @MainActor
-final class OnboardingViewModel: OnboardViewModelIntarface {
+final class OnboardingViewModelImpl: OnboardingViewModelInterface {
     
     enum Event {
         case closePermissionView
@@ -137,7 +137,7 @@ final class OnboardingViewModel: OnboardViewModelIntarface {
     }
 }
 
-extension OnboardingViewModel {
+extension OnboardingViewModelImpl {
     
     func dispatch(_ event: Event) {
         switch event {
