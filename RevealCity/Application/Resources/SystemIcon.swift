@@ -1,0 +1,17 @@
+//
+//  SystemIcon.swift
+//  RevealCity
+//
+//  Created by Максим Сулим on 22.06.2025.
+//
+
+enum SystemIcon: String {
+    case walk = "figure.walk.circle"
+    case chartLine = "chart.line.uptrend.xyaxis"
+    case map = "map.circle"
+    case checkmark = "checkmark.circle.fill"
+    case location = "location.fill"
+    case locationCircle = "location.circle"
+    case locCircleFill = "location.circle.fill"
+    case bell = "bell.fill"
+}

@@ -8,6 +8,48 @@
 import Foundation
 import SwiftUI
 
+struct OnboardingInputModel {
+    var onboarding: [Onboarding]
+    var title: String
+    var subtitle: String
+    var titleNextButton: String
+    var titleLastButton: String
+    var permissionPageInput: PermissionPageInputModel
+}
+
+extension OnboardingInputModel {
+    init(_ permissionInput: PermissionPageInputModel = .init()) {
+        onboarding = Onboarding.allCases
+        title = "Welcome to Loccator"
+        subtitle = "Your personal city exploration companion"
+        titleNextButton = "Next"
+        titleLastButton = "Get started"
+        permissionPageInput = permissionInput
+    }
+}
+
+struct PermissionPageInputModel {
+    var title: String
+    var subtitle: String
+    var continueButton: String
+    var locationLabelTitle: String
+    var locationDescription: String
+    var notificationLabelTitle: String
+    var notificationDescription: String
+}
+
+extension PermissionPageInputModel {
+    init() {
+        title = "Permissions"
+        subtitle = "We need a few permissions to make your exploration experience amazing"
+        continueButton = "Continue"
+        locationDescription = "Track your exploration and reveal new areas"
+        locationLabelTitle = "Location Access"
+        notificationDescription = "Get reminders to explore and celebrate achievements"
+        notificationLabelTitle = "Notifications"
+    }
+}
+
 enum Onboarding: Int, CaseIterable {
     case page1, page2, page3
     
@@ -26,7 +68,7 @@ enum Onboarding: Int, CaseIterable {
 
 struct PageModel: Hashable, Identifiable {
     var id: UUID = UUID()
-    let icon: String
+    let icon: SystemIcon
     let title: String
     let description: String
     let color: Color
@@ -36,17 +78,17 @@ extension PageModel {
     init(from configure: Onboarding) {
         switch configure {
         case .page1:
-            icon = "figure.walk.circle"
+            icon = .walk
             title = "Active Exploration"
             description = "Walk through your city and reveal hidden areas on your personal map"
             color = .labelPrim
         case .page2:
-            icon = "chart.line.uptrend.xyaxis"
+            icon = .chartLine
             title = "Track Progress"
             description = "Monitor your steps, distance, and exploration percentage with beautiful charts"
             color = .accent
         case .page3:
-            icon = "map.circle"
+            icon = .map
             title = "Discover Your City"
             description = "Unlock badges and achievements as you explore more of your surroundings"
             color = .labelPrim

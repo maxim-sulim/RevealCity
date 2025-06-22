@@ -16,15 +16,10 @@ protocol OnboardViewModelIntarface: ObservableObject {
     var isNotificationGranted: Bool { get set }
     var currentPage: Onboarding { get set }
     var isShowPermissionView: Bool { get }
-    var pagesOnboard: [Onboarding] { get }
+    var inputModel: OnboardingInputModel { get }
     var titleButton: String { get }
     
-    func closePermissionView()
-    func nextTapped()
-    func politicTapped(_ politic: Politic)
-    func onboardingComplated()
-    func notificationPermTapped()
-    func locationPermTapped()
+    func dispatch(_ event: OnboardingViewModel.Event)
 }
 
 @MainActor
@@ -36,6 +31,15 @@ protocol OnboardingCoordinatorDelegate: Any {
 @MainActor
 final class OnboardingViewModel: OnboardViewModelIntarface {
     
+    enum Event {
+        case closePermissionView
+        case nextTapped
+        case notificationPermTapped
+        case locationPermTapped
+        case onboardingComplated
+        case politicTapped(_ politic: Politic)
+    }
+    
     private let locationService: LocationService
     private let notificationManager: NotificationManager
     private let applicationManager: OnboardingStateInterface
@@ -43,7 +47,7 @@ final class OnboardingViewModel: OnboardViewModelIntarface {
     
     private var cancellables = Set<AnyCancellable>()
     
-    @Published var pagesOnboard: [Onboarding] = Onboarding.allCases
+    @Published var inputModel: OnboardingInputModel
     @Published var isShowPermissionView: Bool = true
     @Published var currentPage: Onboarding = .page1
     
@@ -51,7 +55,8 @@ final class OnboardingViewModel: OnboardViewModelIntarface {
     @Published var isNotificationGranted: Bool = false
     @Published var titleButton: String = ""
     
-    init(coordinator: OnboardingCoordinatorDelegate,
+    init(inputModel:OnboardingInputModel = .init(),
+         coordinator: OnboardingCoordinatorDelegate,
          appStateManager: OnboardingStateInterface,
          notificationManager: NotificationManager,
          locationService: LocationService) {
@@ -59,6 +64,7 @@ final class OnboardingViewModel: OnboardViewModelIntarface {
         self.applicationManager = appStateManager
         self.notificationManager = notificationManager
         self.locationService = locationService
+        self.inputModel = inputModel
         
         setup()
         bind()
@@ -91,30 +97,27 @@ final class OnboardingViewModel: OnboardViewModelIntarface {
     private func updateUI(for page: Onboarding) {
         switch page {
         case .page1:
-            titleButton = "Next"
+            titleButton = inputModel.titleNextButton
         case .page2:
-            titleButton = "Next"
+            titleButton = inputModel.titleNextButton
         case .page3:
-            titleButton = "Get started"
+            titleButton = inputModel.titleLastButton
         }
     }
-}
-
-extension OnboardingViewModel {
     
-    func notificationPermTapped() {
-        
+    private func notificationPermTapped() {
+        notificationManager.checkNotificationPermission()
     }
     
-    func locationPermTapped() {
-        
+    private func locationPermTapped() {
+        locationService.checkIfLocationServicesEnabled()
     }
     
-    func closePermissionView() {
+    private func closePermissionView() {
         isShowPermissionView.toggle()
     }
    
-    func nextTapped() {
+    private func nextTapped() {
         switch currentPage {
         case .page1:
             currentPage = .page2
@@ -125,11 +128,31 @@ extension OnboardingViewModel {
         }
     }
     
-    func onboardingComplated() {
+    private func onboardingComplated() {
         applicationManager.completedOnboard()
     }
     
-    func politicTapped(_ politic: Politic) {
+    private func politicTapped(_ politic: Politic) {
         coordinator.showPolitic(politic)
+    }
+}
+
+extension OnboardingViewModel {
+    
+    func dispatch(_ event: Event) {
+        switch event {
+        case .closePermissionView:
+            closePermissionView()
+        case .nextTapped:
+            nextTapped()
+        case .notificationPermTapped:
+            notificationPermTapped()
+        case .locationPermTapped:
+            locationPermTapped()
+        case .onboardingComplated:
+            onboardingComplated()
+        case .politicTapped(let politic):
+            politicTapped(politic)
+        }
     }
 }

@@ -7,6 +7,7 @@
 
 import UserNotifications
 import CoreLocation
+import UIKit.UIApplication
 
 protocol NotificationManager {
     var notificationPermissionGrantedPublisher: Published<Bool>.Publisher { get }
