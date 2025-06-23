@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		ABA431BA2E06BB230016E831 /* FlowStacks in Frameworks */ = {isa = PBXBuildFile; productRef = ABA431B92E06BB230016E831 /* FlowStacks */; };
+		ABA4465A2E09DADB0016E831 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = ABA446592E09DADB0016E831 /* KeychainSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABA4465A2E09DADB0016E831 /* KeychainSwift in Frameworks */,
 				ABA431BA2E06BB230016E831 /* FlowStacks in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -71,6 +73,7 @@
 			name = RevealCity;
 			packageProductDependencies = (
 				ABA431B92E06BB230016E831 /* FlowStacks */,
+				ABA446592E09DADB0016E831 /* KeychainSwift */,
 			);
 			productName = RevealCity;
 			productReference = ABA42FC02E06A7470016E831 /* RevealCity.app */;
@@ -102,6 +105,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				ABA431B82E06BB230016E831 /* XCRemoteSwiftPackageReference "FlowStacks" */,
+				ABA446582E09DADB0016E831 /* XCRemoteSwiftPackageReference "keychain-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ABA42FC12E06A7470016E831 /* Products */;
@@ -357,6 +361,14 @@
 				minimumVersion = 0.8.4;
 			};
 		};
+		ABA446582E09DADB0016E831 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -364,6 +376,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ABA431B82E06BB230016E831 /* XCRemoteSwiftPackageReference "FlowStacks" */;
 			productName = FlowStacks;
+		};
+		ABA446592E09DADB0016E831 /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ABA446582E09DADB0016E831 /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

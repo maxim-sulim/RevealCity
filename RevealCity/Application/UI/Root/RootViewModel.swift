@@ -14,6 +14,7 @@ protocol RootViewModel: ObservableObject {
     var isSplashShow: Bool { get set }
     
     func onboardingFlow() -> OnboardingCoordinator
+    func mainFlow() -> MainCoordinator
     func onApepar()
 }
 
@@ -39,5 +40,9 @@ extension RootViewModelImpl {
     
     func onboardingFlow() -> OnboardingCoordinator {
         router.makeOnboardingCoordinator()
+    }
+    
+    func mainFlow() -> MainCoordinator {
+        router.makeMainCoordinator()
     }
 }

@@ -11,20 +11,23 @@ protocol LoggerManager {
     func log(_ message: String)
 }
 
-final class LoggerManagerImpl {
+final class LoggerManagerImpl: LoggerManager {
     
     enum Configuration: String {
         case locationManager
+        case mapManager
         
         var categoty: String {
             switch self {
             case .locationManager: "Manager"
+            case .mapManager: "Manager"
             }
         }
         
         var name: String {
             switch self {
             case .locationManager: "LocationManager: -"
+            case .mapManager: "MapManager: -"
             }
         }
     }

@@ -11,9 +11,15 @@ import SwiftUI
 final class AppContainer: ObservableObject {
     
     private var weakDependencies = [String: WeakContainer]()
+    private let isPreview: Bool
+    private let locationService: LocationService
     
     init(isPreview: Bool = false) {
+        self.isPreview = isPreview
         
+        locationService = isPreview
+        ? LocationSerivceMock()
+        : LocationServiceImpl()
     }
     
     private func getWeak<T: AnyObject>(initialize: () -> T) -> T {
@@ -28,6 +34,13 @@ final class AppContainer: ObservableObject {
         
         return object
     }
+    
+    private func makeWeakMapManager() -> MapManager {
+        getWeak {
+            MapManagerImpl(locationService: locationService,
+                           keychainService: .init())
+        }
+    }
 }
 
 extension AppContainer {
@@ -37,6 +50,10 @@ extension AppContainer {
 }
 
 extension AppContainer: RootContainer {
+    func makeMainAssembly() -> MainAssembly {
+        .init(container: self)
+    }
+    
     func makeOnboardingAssembly() -> OnboardingAssembly {
         .init(container: self)
     }
@@ -56,10 +73,12 @@ extension AppContainer: OnboardingContainer {
     }
     
     func makeLocationService() -> any LocationService {
-        getWeak {
-            LocationServiceImpl()
-        }
+        locationService
     }
-    
-    
+}
+
+extension AppContainer: MainContainer {
+    func makeMapManager() -> any MapManager {
+        isPreview ? MapManagerMock() : makeWeakMapManager()
+    }
 }

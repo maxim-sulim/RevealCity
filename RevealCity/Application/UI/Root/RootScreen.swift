@@ -29,7 +29,7 @@ struct RootScreen<ViewModel: RootViewModel>: View {
         if vm.isOnboardingShown {
             vm.onboardingFlow()
         } else {
-            EmptyView()
+            vm.mainFlow()
         }
     }
 }

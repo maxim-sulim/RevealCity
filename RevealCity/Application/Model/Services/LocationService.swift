@@ -10,8 +10,11 @@ import UIKit.UIApplication
 
 protocol LocationService {
     var isLocationEnabledPublisher: Published<Bool>.Publisher { get }
+    var currentLocationPublisher: Published<CLLocation?>.Publisher { get }
     
     func checkIfLocationServicesEnabled()
+    func startLocationUpdates()
+    func stopLocationUpdates()
 }
 
 final class LocationServiceImpl: NSObject, LocationService {
@@ -20,8 +23,10 @@ final class LocationServiceImpl: NSObject, LocationService {
     private var locationManager: CLLocationManager?
     
     @Published private var isLocationEnabled: Bool = false
+    @Published private var currentLocation: CLLocation?
     
     var isLocationEnabledPublisher: Published<Bool>.Publisher { $isLocationEnabled }
+    var currentLocationPublisher: Published<CLLocation?>.Publisher { $currentLocation }
     
     override init() {
         super.init()
@@ -29,19 +34,6 @@ final class LocationServiceImpl: NSObject, LocationService {
         checkIfLocationServicesEnabled()
     }
     
-    func checkIfLocationServicesEnabled() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else { return }
-            
-            if CLLocationManager.locationServicesEnabled() {
-                locationManager = CLLocationManager()
-                locationManager?.delegate = self
-                checlLocationAuthorizationStatus()
-            } else {
-                logger.log("Error: Location services are not enabled")
-            }
-        }
-    }
     
     private func checlLocationAuthorizationStatus() {
         guard let locationManager = locationManager else { return }
@@ -59,6 +51,36 @@ final class LocationServiceImpl: NSObject, LocationService {
             logger.log("Error: unknown error")
         }
     }
+    
+    func checkIfLocationServicesEnabled() {
+        DispatchQueue.global().async { [weak self] in
+            guard let self else { return }
+            
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager = CLLocationManager()
+                locationManager?.delegate = self
+                checlLocationAuthorizationStatus()
+            } else {
+                logger.log("Error: Location services are not enabled")
+            }
+        }
+    }
+    
+    func startLocationUpdates() {
+        guard isLocationEnabled else {
+            return
+        }
+        
+        guard let locationManager = locationManager else { return }
+        
+        locationManager.startUpdatingLocation()
+    }
+    
+    func stopLocationUpdates() {
+        guard let locationManager = locationManager else { return }
+        locationManager.stopUpdatingLocation()
+        isLocationEnabled = false
+    }
 }
 
 extension LocationServiceImpl: CLLocationManagerDelegate {
@@ -70,5 +92,13 @@ extension LocationServiceImpl: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         checlLocationAuthorizationStatus()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        
+        if location.horizontalAccuracy < 100 {
+            currentLocation = location
+        }
     }
 }
