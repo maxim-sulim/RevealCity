@@ -10,6 +10,7 @@ import Foundation
 @MainActor
 protocol RootRouter: ObservableObject {
     func makeOnboardingCoordinator() -> OnboardingCoordinator
+    func makeMainCoordinator() -> MainCoordinator
 }
 
 @MainActor
@@ -25,5 +26,9 @@ final class RootRouterImpl: RootRouter {
 extension RootRouterImpl {
     func makeOnboardingCoordinator() -> OnboardingCoordinator {
         container.makeOnboardingAssembly().coordinator()
+    }
+    
+    func makeMainCoordinator() -> MainCoordinator {
+        container.makeMainAssembly().coordintor()
     }
 }

@@ -52,7 +52,7 @@ struct PermissionLabel: View {
 #Preview {
     ZStack {
         Color.white.ignoresSafeArea()
-        PermissionLabel(icon: SystemIcon.location,
+        PermissionLabel(icon: SystemIcon.locationFill,
                         title: "Location Access",
                         description: "Track your exploration and reveal new areas",
                         isGranted: true)

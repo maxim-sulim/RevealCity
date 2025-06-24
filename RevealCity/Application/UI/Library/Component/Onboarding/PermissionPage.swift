@@ -62,7 +62,7 @@ struct PermissionPage: View {
                 onDispatch(.locationPermTapped)
             } label: {
                 PermissionLabel(
-                    icon: SystemIcon.location,
+                    icon: SystemIcon.locationFill,
                     title: inputModel.locationLabelTitle,
                     description: inputModel.locationDescription,
                     isGranted: isLocationGranted,

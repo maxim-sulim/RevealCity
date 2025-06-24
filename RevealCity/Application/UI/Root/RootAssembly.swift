@@ -8,6 +8,7 @@
 @MainActor
 protocol RootContainer {
     func makeOnboardingAssembly() -> OnboardingAssembly
+    func makeMainAssembly() -> MainAssembly
 }
 
 @MainActor
