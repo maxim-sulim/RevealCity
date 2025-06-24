@@ -22,37 +22,22 @@ struct MainScreen<ViewModel: MainViewModel>: View {
             map
                 .ignoresSafeArea()
         }
-        .onAppear {
-            vm.dispatch(.onAppear)
-        }
-        .onDisappear {
-            vm.dispatch(.onDisappear)
-        }
         .safeAreaInset(edge: .bottom) {
             currentLocationButton
         }
     }
     
     private var map: some View {
-        Map(coordinateRegion: $vm.region,
-            annotationItems: vm.explorationData.exploredAreas) { area in
-            MapAnnotation(coordinate: area.centerPoint.coordinate) {
-                Circle()
-                    .fill(.accent)
-                    .frame(width: 20, height: 20)
-                    .overlay(
-                        Circle()
-                            .stroke(.labelPrim, lineWidth: 2)
-                    )
-            }
+        Map(initialPosition: .region(vm.region)) {
+            
         }
     }
     
     private var currentLocationButton: some View {
-        Button(action: {
+        Button {
             vm.dispatch(.currentLocationTapped)
-        }) {
-            Image(systemName: "location")
+        } label: {
+            Image(systemName: SystemIcon.location.rawValue)
                 .font(.title2)
                 .foregroundStyle(.white)
                 .frame(width: 48, height: 48)

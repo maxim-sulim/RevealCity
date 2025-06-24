@@ -29,8 +29,6 @@ protocol MainCoordinatorDelegate {
 final class MainViewModelImpl: MainViewModel {
     
     enum Event {
-        case onAppear
-        case onDisappear
         case currentLocationTapped
     }
     
@@ -65,25 +63,13 @@ final class MainViewModelImpl: MainViewModel {
             .subscribe(on: RunLoop.main)
             .assign(to: &$explorationData)
     }
-    
-    private func startLocationMonitoring() {
-        locationService.startLocationUpdates()
-    }
-    
-    private func stopLocationMonitoring() {
-        locationService.stopLocationUpdates()
-    }
 }
 
-//MARK: - outpu
+//MARK: - output
 extension MainViewModelImpl {
     
     func dispatch(_ event: Event) {
         switch event {
-        case .onAppear:
-            startLocationMonitoring()
-        case .onDisappear:
-            stopLocationMonitoring()
         case .currentLocationTapped:
             mapManager.toMyselfLocation()
         }

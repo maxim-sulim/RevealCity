@@ -8,12 +8,17 @@ import CoreLocation
 import Combine
 
 final class LocationSerivceMock: LocationService {
+    var isLocationEnabledPublisher: AnyPublisher<Bool, Never> {
+        $isLocationEnabled.eraseToAnyPublisher()
+    }
+    
+    var currentLocationPublisher: AnyPublisher<CLLocation?, Never> {
+        $currentLocation.eraseToAnyPublisher()
+    }
+    
     
     @Published private var isLocationEnabled: Bool = true
     @Published private var currentLocation: CLLocation?
-    
-    var currentLocationPublisher: Published<CLLocation?>.Publisher { $currentLocation }
-    var isLocationEnabledPublisher: Published<Bool>.Publisher { $isLocationEnabled }
     
     func checkIfLocationServicesEnabled() {
         

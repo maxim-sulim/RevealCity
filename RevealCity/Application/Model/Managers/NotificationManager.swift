@@ -6,26 +6,25 @@
 //
 
 import UserNotifications
-import CoreLocation
-import UIKit.UIApplication
+import Combine
 
 protocol NotificationManager {
-    var notificationPermissionGrantedPublisher: Published<Bool>.Publisher { get }
+    var notificationPermissionGrantedPublisher: AnyPublisher<Bool, Never> { get }
     
     func checkNotificationPermission()
 }
 
 final class NotificationManagerImpl: NotificationManager {
     
-    var notificationPermissionGrantedPublisher: Published<Bool>.Publisher { $notificationPermissionGranted }
+    var notificationPermissionGrantedPublisher: AnyPublisher<Bool, Never> {
+        notificationPermissionGranted.eraseToAnyPublisher()
+    }
     
-    @Published private var notificationPermissionGranted: Bool = false
+    private var notificationPermissionGranted: CurrentValueSubject<Bool, Never> = .init(false)
     
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            DispatchQueue.main.async { [weak self] in
-                self?.notificationPermissionGranted = granted
-            }
+            self.notificationPermissionGranted.send(granted)
         }
     }
     
@@ -35,7 +34,7 @@ final class NotificationManagerImpl: NotificationManager {
             case .notDetermined, .denied:
                 self?.requestNotificationPermission()
             case .authorized, .ephemeral, .provisional:
-                self?.notificationPermissionGranted = true
+                self?.notificationPermissionGranted.send(true)
             @unknown default:
                 break
             }
