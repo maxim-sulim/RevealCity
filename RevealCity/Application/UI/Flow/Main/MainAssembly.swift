@@ -8,7 +8,7 @@
 @MainActor
 protocol MainContainer {
     func makeLocationService() -> any LocationService
-    func makeMapManager() -> MapManager
+    func makeExplorationMaanger() -> ExplorationManager
 }
 
 @MainActor

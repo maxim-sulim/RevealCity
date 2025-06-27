@@ -15,19 +15,19 @@ final class LoggerManagerImpl: LoggerManager {
     
     enum Configuration: String {
         case locationManager
-        case mapManager
+        case explorationManager
         
         var categoty: String {
             switch self {
             case .locationManager: "Manager"
-            case .mapManager: "Manager"
+            case .explorationManager: "Manager"
             }
         }
         
         var name: String {
             switch self {
             case .locationManager: "LocationManager: -"
-            case .mapManager: "MapManager: -"
+            case .explorationManager: "ExplorationManager: -"
             }
         }
     }

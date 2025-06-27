@@ -7,6 +7,7 @@
 
 import CoreLocation
 import Combine
+import YandexMapsMobile
 
 protocol LocationService {
     var isLocationEnabledPublisher: AnyPublisher<Bool, Never> { get }
@@ -17,11 +18,10 @@ protocol LocationService {
 
 final class LocationServiceImpl: NSObject, LocationService {
     
-    private let logger = LoggerManagerImpl(configuration: .locationManager)
-    private var locationManager: CLLocationManager?
+    private let logger: LoggerManager
+    private var locationManager: CLLocationManager = CLLocationManager()
     
     private var isLocationEnabled: CurrentValueSubject<Bool, Never> = .init(false)
-    
     private var currentLocation: CurrentValueSubject<CLLocation?, Never> = .init(nil)
     
     var isLocationEnabledPublisher: AnyPublisher<Bool, Never> {
@@ -32,19 +32,18 @@ final class LocationServiceImpl: NSObject, LocationService {
         currentLocation.eraseToAnyPublisher()
     }
     
-    override init() {
+    init(logger: LoggerManager) {
+        self.logger = logger
         super.init()
         
         checkIfLocationServicesEnabled()
     }
     
-    
     private func handleLocationStatus(_ status: CLAuthorizationStatus) {
-        
         switch status {
             
         case .notDetermined:
-            locationManager?.requestWhenInUseAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
             logger.log("Error: Location services are not authorized")
             stopLocationUpdates()
@@ -61,10 +60,8 @@ final class LocationServiceImpl: NSObject, LocationService {
             guard let self else { return }
             
             if CLLocationManager.locationServicesEnabled() {
-                locationManager = CLLocationManager()
-                locationManager?.delegate = self
-                
-                guard let locationManager = locationManager else { return }
+                locationManager.delegate = self
+                locationManager.startUpdatingLocation()
                 handleLocationStatus(locationManager.authorizationStatus)
             } else {
                 logger.log("Error: Location services are not enabled")
@@ -77,13 +74,10 @@ final class LocationServiceImpl: NSObject, LocationService {
             return
         }
         
-        guard let locationManager = locationManager else { return }
-        
         locationManager.startUpdatingLocation()
     }
     
     private func stopLocationUpdates() {
-        guard let locationManager = locationManager else { return }
         locationManager.stopUpdatingLocation()
         isLocationEnabled.send(false)
     }
@@ -98,11 +92,10 @@ extension LocationServiceImpl: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         handleLocationStatus(status)
+        logger.log("didChangeAuthorization:\(status)")
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
-        
-        currentLocation.send(location)
+        currentLocation.send(locations.last)
     }
 }
