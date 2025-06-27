@@ -12,14 +12,22 @@ final class AppContainer: ObservableObject {
     
     private var weakDependencies = [String: WeakContainer]()
     private let isPreview: Bool
+    
     private let locationService: LocationService
+    private let explorationManager: ExplorationManager
     
     init(isPreview: Bool = false) {
         self.isPreview = isPreview
         
         locationService = isPreview
         ? LocationSerivceMock()
-        : LocationServiceImpl()
+        : LocationServiceImpl(logger: LoggerManagerImpl(configuration: .locationManager))
+        
+        explorationManager = isPreview
+        ? ExplorationMock()
+        : ExplorationManagerImpl(locationService: locationService,
+                                 keychainService: .init(),
+                                 logger: LoggerManagerImpl(configuration: .explorationManager))
     }
     
     private func getWeak<T: AnyObject>(initialize: () -> T) -> T {
@@ -33,13 +41,6 @@ final class AppContainer: ObservableObject {
         weakDependencies[id] = .init(object: object)
         
         return object
-    }
-    
-    private func makeWeakMapManager() -> MapManager {
-        getWeak {
-            MapManagerImpl(locationService: locationService,
-                           keychainService: .init())
-        }
     }
 }
 
@@ -78,7 +79,7 @@ extension AppContainer: OnboardingContainer {
 }
 
 extension AppContainer: MainContainer {
-    func makeMapManager() -> any MapManager {
-        isPreview ? MapManagerMock() : makeWeakMapManager()
+    func makeExplorationMaanger() -> any ExplorationManager {
+        explorationManager
     }
 }

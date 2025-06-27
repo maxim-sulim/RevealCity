@@ -13,15 +13,11 @@ private struct CityBounds {
     let totalArea: Double = 50_000_000.0
 }
 
-protocol MapManager {
-    var currentLocationPublished: Published<LocationPoint?>.Publisher { get }
-    var explorationDataPublished: Published<ExplorationData>.Publisher { get }
-    var regionPublished: Published<MKCoordinateRegion>.Publisher { get }
-    
-    func toMyselfLocation()
+protocol ExplorationManager {
+    var explorationDataPublished: AnyPublisher<ExplorationData, Never> { get }
 }
 
-final class MapManagerImpl: MapManager {
+final class ExplorationManagerImpl: ExplorationManager {
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -31,28 +27,20 @@ final class MapManagerImpl: MapManager {
     
     @Published private var currentLocation: LocationPoint?
     @Published private var explorationData = ExplorationData()
-    @Published private var region = MKCoordinateRegion()
     
     private let explorationRadius: Double = 50.0
     private let cityBounds = CityBounds()
-    
-    var currentLocationPublished: Published<LocationPoint?>.Publisher {
-        $currentLocation
+   
+    var explorationDataPublished: AnyPublisher<ExplorationData, Never> {
+        $explorationData.eraseToAnyPublisher()
     }
-    
-    var explorationDataPublished: Published<ExplorationData>.Publisher {
-        $explorationData
-    }
-    
-    var regionPublished: Published<MKCoordinateRegion>.Publisher {
-        $region
-    }
-    
+ 
     init(locationService: LocationService,
-         keychainService: KeychainServiceImpl) {
+         keychainService: KeychainServiceImpl,
+         logger: LoggerManager) {
         self.locationService = locationService
         self.keychainService = keychainService
-        self.logger = LoggerManagerImpl(configuration: .mapManager)
+        self.logger = logger
         
         bind()
     }
@@ -76,7 +64,6 @@ final class MapManagerImpl: MapManager {
         )
         
         currentLocation = locationPoint
-        region.center = location.coordinate
         
         if location.horizontalAccuracy < 50 {
             addExploredArea(at: locationPoint)
@@ -116,9 +103,5 @@ final class MapManagerImpl: MapManager {
         } catch let error {
             logger.log("Error: \(error.localizedDescription)")
         }
-    }
-    
-    func toMyselfLocation() {
-        region.center = currentLocation?.coordinate ?? .init()
     }
 }

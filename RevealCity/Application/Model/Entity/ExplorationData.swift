@@ -13,13 +13,6 @@ struct ExplorationData: Codable, Equatable {
     var explorationPercentage: Double
     var lastUpdated: Date
     
-    init() {
-        self.exploredAreas = []
-        self.totalDistance = 0
-        self.explorationPercentage = 0
-        self.lastUpdated = .now
-    }
-    
     mutating func addExploredArea(_ area: ExploredArea) {
         let overlappingAreas = exploredAreas.filter { $0.overlaps(with: area) }
         
@@ -27,5 +20,14 @@ struct ExplorationData: Codable, Equatable {
             exploredAreas.append(area)
             lastUpdated = Date()
         }
+    }
+}
+
+extension ExplorationData {
+    init() {
+        self.exploredAreas = []
+        self.totalDistance = 0
+        self.explorationPercentage = 0
+        self.lastUpdated = .now
     }
 }

@@ -23,7 +23,7 @@ final class MainRouter: ObservableObject {
     func makeRootScreen() -> MainScreen<MainViewModelImpl> {
         MainScreen(vm: MainViewModelImpl(coordinator: self,
                                          locationService: self.container.makeLocationService(),
-                                         mapManager: self.container.makeMapManager()))
+                                         explorationMaanger: self.container.makeExplorationMaanger()))
     }
 }
 

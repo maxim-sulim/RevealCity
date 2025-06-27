@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct OnboardingInputModel {
-    var pages: [Onboarding]
-    var title: String
-    var subtitle: String
-    var titleNextButton: String
-    var titleLastButton: String
-    var permissionPageInput: PermissionPageInputModel
+    let pages: [Onboarding]
+    let title: String
+    let subtitle: String
+    let titleNextButton: String
+    let titleLastButton: String
+    let permissionPageInput: PermissionPageInputModel
 }
 
 extension OnboardingInputModel {
@@ -29,13 +29,13 @@ extension OnboardingInputModel {
 }
 
 struct PermissionPageInputModel {
-    var title: String
-    var subtitle: String
-    var continueButton: String
-    var locationLabelTitle: String
-    var locationDescription: String
-    var notificationLabelTitle: String
-    var notificationDescription: String
+    let title: String
+    let subtitle: String
+    let continueButton: String
+    let locationLabelTitle: String
+    let locationDescription: String
+    let notificationLabelTitle: String
+    let notificationDescription: String
 }
 
 extension PermissionPageInputModel {
