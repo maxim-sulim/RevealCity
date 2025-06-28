@@ -13,11 +13,11 @@ private struct CityBounds {
     let totalArea: Double = 50_000_000.0
 }
 
-protocol ExplorationManager {
+protocol ExplorationObserver {
     var explorationDataPublished: AnyPublisher<ExplorationData, Never> { get }
 }
 
-final class ExplorationManagerImpl: ExplorationManager {
+final class ExplorationObserverImpl: ExplorationObserver {
     
     private var cancellables: Set<AnyCancellable> = []
     

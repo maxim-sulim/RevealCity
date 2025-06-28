@@ -7,7 +7,7 @@
 import Combine
 import MapKit
 
-final class ExplorationMock: ExplorationManager {
+final class ExplorationMock: ExplorationObserver {
     
     var explorationDataPublished: AnyPublisher<ExplorationData, Never> { $explorationData.eraseToAnyPublisher() }
     
