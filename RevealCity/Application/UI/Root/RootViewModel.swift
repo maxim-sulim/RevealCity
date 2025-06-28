@@ -22,13 +22,16 @@ protocol RootViewModel: ObservableObject {
 final class RootViewModelImpl: RootViewModel {
     
     private let router: any RootRouter
+    private let onbStateManager: OnboardingStateInterface
     
-    @AppStorage(.onboardingKey) var isOnboardingShown = true
-    
+    @Published var isOnboardingShown: Bool
     @Published var isSplashShow: Bool = false
     
-    init(router: any RootRouter) {
+    init(router: any RootRouter,
+         onbStateManager: OnboardingStateInterface) {
         self.router = router
+        self.onbStateManager = onbStateManager
+        isOnboardingShown = onbStateManager.isOnboardingShown
     }
 }
 

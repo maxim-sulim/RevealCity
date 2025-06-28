@@ -15,7 +15,7 @@ protocol OnboardingStateInterface {
 
 final class ApplicationStateManager {
     
-    @AppStorage(.onboardingKey) var isOnboardingShown = true
+    @AppStorage(Keys.Storage.onboardingKey.rawValue) var isOnboardingShown = true
     
 }
 

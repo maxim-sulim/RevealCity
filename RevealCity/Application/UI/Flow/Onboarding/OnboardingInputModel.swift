@@ -20,7 +20,7 @@ struct OnboardingInputModel {
 extension OnboardingInputModel {
     init(_ permissionInput: PermissionPageInputModel = .init()) {
         pages = Onboarding.allCases
-        title = "Welcome to Loccator"
+        title = "Welcome to RevealCity"
         subtitle = "Your personal city exploration companion"
         titleNextButton = "Next"
         titleLastButton = "Get started"

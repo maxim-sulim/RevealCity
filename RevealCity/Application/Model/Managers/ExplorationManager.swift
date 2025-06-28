@@ -65,7 +65,7 @@ final class ExplorationManagerImpl: ExplorationManager {
         
         currentLocation = locationPoint
         
-        if location.horizontalAccuracy < 50 {
+        if location.horizontalAccuracy < explorationRadius {
             addExploredArea(at: locationPoint)
         }
     }
