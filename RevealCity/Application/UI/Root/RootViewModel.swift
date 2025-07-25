@@ -10,19 +10,36 @@ import SwiftUI
 
 @MainActor
 protocol RootViewModel: ObservableObject {
-    var isOnboardingShown: Bool { get }
+    var isSplashShow: Bool { get set }
+    
+    func onboardingFlow() -> OnboardingCoordinator
+    func mainFlow() -> MainCoordinator
+    func onApepar()
 }
 
 @MainActor
 final class RootViewModelImpl: RootViewModel {
     
-    @AppStorage(.onboardingKey) var isOnboardingShown = true
-    
     private let router: any RootRouter
+    
+    @Published var isSplashShow: Bool = false
     
     init(router: any RootRouter) {
         self.router = router
     }
+}
 
+extension RootViewModelImpl {
     
+    func onApepar()  {
+        isSplashShow.toggle()
+    }
+    
+    func onboardingFlow() -> OnboardingCoordinator {
+        router.makeOnboardingCoordinator()
+    }
+    
+    func mainFlow() -> MainCoordinator {
+        router.makeMainCoordinator()
+    }
 }
