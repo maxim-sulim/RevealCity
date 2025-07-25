@@ -9,13 +9,13 @@ import SwiftUI
 
 struct GridTilesView: View {
     
-    var tiles: [[Tile]]
-    var playerPosition: (x: Int, y: Int)
+    var tiles: [[Cell]]
+    var playerPosition: GridPoint
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .zero) {
             ForEach(tiles, id: \.self) { row in
-                HStack(spacing: 0) {
+                HStack(spacing: .zero) {
                     ForEach(row) { tile in
                         TileView(tile: tile, isPlayerHere: isPlayer(tile))
                     }
@@ -24,7 +24,7 @@ struct GridTilesView: View {
         }
     }
 
-    private func isPlayer(_ tile: Tile) -> Bool {
-        tile.x == playerPosition.x && tile.y == playerPosition.y
+    private func isPlayer(_ tile: Cell) -> Bool {
+        tile.point.x == playerPosition.x && tile.point.y == playerPosition.y
     }
 }

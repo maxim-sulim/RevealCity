@@ -29,23 +29,22 @@ final class MainViewModelImpl: MainViewModel {
     enum Event {
         case onAppear
         case currentLocationTapped
-        case updateGrid(CGSize)
     }
     
     private let coordinator: MainCoordinatorDelegate
     private let locationService: LocationService
     private let explorationMaanger: ExplorationObserver
-
-    private var fogUpdater: FogOfWarUpdater
+    
+    private var fogUpdater: FogOfWarUpdater = .init()
     private var cancellables = Set<AnyCancellable>()
     
-    @Published
-    private var currnetLocation: CLLocation?
+    private var currentLocation: CLLocation?
+    private var lastLocation: CLLocation?
     
     @Published var mapView = YMKMapView(frame: CGRect.zero)
     @Published var exploredPercent: Double = 0
-    @Published var tiles: [[Tile]] = []
-    @Published var playerPosition: (x: Int, y: Int) = Constants.Size.map.center
+    @Published var cells: [[Cell]] = []
+    @Published var playerPosition: GridPoint = Constants.Size.map.center
     
     init(coordinator: MainCoordinatorDelegate,
          locationService: LocationService,
@@ -54,16 +53,18 @@ final class MainViewModelImpl: MainViewModel {
         self.locationService = locationService
         self.explorationMaanger = explorationMaanger
         
-        fogUpdater = .init(xCount: Constants.Size.map.gridWidth,
-                           yCount: Constants.Size.map.gridHeight)
-        
         bind()
     }
     
     private func bind() {
         locationService.currentLocationPublisher
             .receive(on: RunLoop.main)
-            .assign(to: &$currnetLocation)
+            .sink { [weak self] location in
+                guard let self, let location = location else { return }
+                guard location != self.lastLocation else { return }
+                locationUpdate(location: location)
+            }
+            .store(in: &cancellables)
         
         explorationMaanger.explorationDataPublished
             .receive(on: RunLoop.main)
@@ -71,10 +72,45 @@ final class MainViewModelImpl: MainViewModel {
             .assign(to: &$exploredPercent)
         
         $playerPosition
+            .receive(on: RunLoop.main)
             .sink { [weak self] newPosition in
                 self?.updateFog(from: newPosition)
             }
             .store(in: &cancellables)
+    }
+    
+    private func locationUpdate(location: CLLocation) {
+        if lastLocation == nil {
+            lastLocation = location
+        }
+        self.currentLocation = location
+        
+        do {
+            let newPosition = try calculateMovePlayerPosition()
+            
+            movePlayer(dx: newPosition.x, dy: newPosition.y)
+            self.lastLocation = currentLocation
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    private func fetchExploredArea() {
+        let explorationData = explorationMaanger.getExploredData()
+        guard let mapWindow = mapView?.mapWindow else { return }
+        
+        let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
+        let screenMin = YMKScreenPoint(x: 0, y: 0)
+        
+        guard let mapBottomRight = mapWindow.screenToWorld(with: screenMax),
+              let mapTopLeft = mapWindow.screenToWorld(with: screenMin) else { return }
+        
+        fogUpdater.fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
+                                            mapTopLeft: .init(latitude: mapTopLeft.latitude,
+                                                              longitude: mapTopLeft.longitude),
+                                            mapBottomRight: .init(latitude: mapBottomRight.latitude,
+                                                                  longitude: mapBottomRight.longitude))
+        
     }
     
     private func setCenterMapLocation(target location: YMKPoint?, map: YMKMapView) {
@@ -85,32 +121,56 @@ final class MainViewModelImpl: MainViewModel {
         )
     }
     
-    private func moveToUserLocation(){
-        if let myLocation = currnetLocation, let map = mapView {
+    private func moveMapToCenter() {
+        if let myLocation = currentLocation, let map = mapView {
+            playerPosition = Constants.Size.map.center
             setCenterMapLocation(target: YMKPoint(latitude: myLocation.coordinate.latitude,
-                                               longitude: myLocation.coordinate.longitude),
-                              map: map)
+                                                  longitude: myLocation.coordinate.longitude),
+                                 map: map)
         }
     }
     
-    private func moveToUserWithDelay() {
+    private func onAppear() {
         Task {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             await MainActor.run {
-                moveToUserLocation()
+                moveMapToCenter()
+                fetchExploredArea()
             }
         }
     }
     
-    private func updateFog(from position: (x: Int, y: Int)) {
+    private func updateFog(from position: GridPoint) {
         fogUpdater.updateFog(from: position, radius: 2)
-        tiles = fogUpdater.tiles
+        cells = fogUpdater.cells
     }
     
-    private func updateGrid(size: CGSize) {
-        fogUpdater.setGrid(xCount: Int(size.width / 12),
-                           yCount: Int(size.height / 14))
-        updateFog(from: playerPosition)
+    private func calculateMovePlayerPosition() throws -> GridPoint {
+        guard let mapWindow = mapView?.mapWindow,
+              let currentLocation = currentLocation,
+              let lastLocation = lastLocation else {
+            throw URLError(.unknown)
+        }
+        
+        let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
+        let screenMin = YMKScreenPoint(x: 0, y: 0)
+        
+        guard let worldMax = mapWindow.screenToWorld(with: screenMax),
+              let worldMin = mapWindow.screenToWorld(with: screenMin) else {
+            throw URLError(.unknown)
+        }
+        
+        let worldDx = (worldMax.longitude - worldMin.longitude) / 12.0
+        let worldDy = (worldMax.latitude - worldMin.latitude) / 14.0
+        
+        guard worldDx != 0 && worldDy != 0 else {
+            throw URLError(.unknown)
+        }
+        
+        let dx = Int((currentLocation.coordinate.longitude - lastLocation.coordinate.longitude) / worldDx)
+        let dy = Int((currentLocation.coordinate.latitude - lastLocation.coordinate.latitude) / worldDy)
+        
+        return .init(x: dx, y: dy)
     }
 }
 
@@ -120,11 +180,9 @@ extension MainViewModelImpl {
     func dispatch(_ event: Event) {
         switch event {
         case .onAppear:
-            moveToUserWithDelay()
+            onAppear()
         case .currentLocationTapped:
-            moveToUserLocation()
-        case .updateGrid(let size):
-            updateGrid(size: size)
+            moveMapToCenter()
         }
     }
 }
@@ -135,6 +193,6 @@ extension MainViewModelImpl {
     func movePlayer(dx: Int, dy: Int) {
         let newX = max(0, min(fogUpdater.xCount - 1, playerPosition.x + dx))
         let newY = max(0, min(fogUpdater.yCount - 1, playerPosition.y + dy))
-        playerPosition = (newX, newY)
+        playerPosition = .init(x: newX, y: newY)
     }
 }

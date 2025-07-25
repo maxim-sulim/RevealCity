@@ -8,6 +8,10 @@ import CoreLocation
 import Combine
 
 final class LocationSerivceMock: LocationService {
+    func getCurrentCoordinates() -> CLLocationCoordinate2D? {
+        nil
+    }
+    
     var isLocationEnabledPublisher: AnyPublisher<Bool, Never> {
         $isLocationEnabled.eraseToAnyPublisher()
     }

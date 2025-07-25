@@ -7,13 +7,13 @@
 
 import CoreLocation
 import Combine
-import YandexMapsMobile
 
 protocol LocationService {
     var isLocationEnabledPublisher: AnyPublisher<Bool, Never> { get }
     var currentLocationPublisher: AnyPublisher<CLLocation?, Never> { get }
     
     func checkIfLocationServicesEnabled()
+    func getCurrentCoordinates() -> CLLocationCoordinate2D?
 }
 
 final class LocationServiceImpl: NSObject, LocationService {
@@ -55,20 +55,6 @@ final class LocationServiceImpl: NSObject, LocationService {
         }
     }
     
-    func checkIfLocationServicesEnabled() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else { return }
-            
-            if CLLocationManager.locationServicesEnabled() {
-                locationManager.delegate = self
-                locationManager.startUpdatingLocation()
-                handleLocationStatus(locationManager.authorizationStatus)
-            } else {
-                logger.log("Error: Location services are not enabled")
-            }
-        }
-    }
-    
     private func startLocationUpdates() {
         guard isLocationEnabled.value else {
             return
@@ -80,6 +66,25 @@ final class LocationServiceImpl: NSObject, LocationService {
     private func stopLocationUpdates() {
         locationManager.stopUpdatingLocation()
         isLocationEnabled.send(false)
+    }
+    
+    func getCurrentCoordinates() -> CLLocationCoordinate2D? {
+        currentLocation.value?.coordinate
+    }
+    
+    func checkIfLocationServicesEnabled() {
+        DispatchQueue.global().async { [weak self] in
+            guard let self else { return }
+            
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager.delegate = self
+                locationManager.distanceFilter = 5
+                locationManager.startUpdatingLocation()
+                handleLocationStatus(locationManager.authorizationStatus)
+            } else {
+                logger.log("Error: Location services are not enabled")
+            }
+        }
     }
 }
 

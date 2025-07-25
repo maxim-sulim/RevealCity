@@ -10,7 +10,6 @@ import SwiftUI
 
 @MainActor
 protocol RootViewModel: ObservableObject {
-    var isOnboardingShown: Bool { get }
     var isSplashShow: Bool { get set }
     
     func onboardingFlow() -> OnboardingCoordinator
@@ -22,16 +21,11 @@ protocol RootViewModel: ObservableObject {
 final class RootViewModelImpl: RootViewModel {
     
     private let router: any RootRouter
-    private let onbStateManager: OnboardingStateInterface
     
-    @Published var isOnboardingShown: Bool
     @Published var isSplashShow: Bool = false
     
-    init(router: any RootRouter,
-         onbStateManager: OnboardingStateInterface) {
+    init(router: any RootRouter) {
         self.router = router
-        self.onbStateManager = onbStateManager
-        isOnboardingShown = onbStateManager.isOnboardingShown
     }
 }
 

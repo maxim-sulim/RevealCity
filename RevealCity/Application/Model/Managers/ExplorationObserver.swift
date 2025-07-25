@@ -15,6 +15,8 @@ private struct CityBounds {
 
 protocol ExplorationObserver {
     var explorationDataPublished: AnyPublisher<ExplorationData, Never> { get }
+    
+    func getExploredData() -> ExplorationData
 }
 
 final class ExplorationObserverImpl: ExplorationObserver {
@@ -42,7 +44,17 @@ final class ExplorationObserverImpl: ExplorationObserver {
         self.keychainService = keychainService
         self.logger = logger
         
+        fetchData()
         bind()
+    }
+    
+    private func fetchData() {
+        do {
+            explorationData = try keychainService.getObject(forKey: Keys.Storage.exploration.rawValue,
+                                                            castTo: ExplorationData.self)
+        } catch {
+            logger.log("Error: \(error.localizedDescription)")
+        }
     }
     
     private func bind() {
@@ -103,5 +115,11 @@ final class ExplorationObserverImpl: ExplorationObserver {
         } catch let error {
             logger.log("Error: \(error.localizedDescription)")
         }
+    }
+}
+
+extension ExplorationObserverImpl {
+    func getExploredData() -> ExplorationData {
+        explorationData
     }
 }

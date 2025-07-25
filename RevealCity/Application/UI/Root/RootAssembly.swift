@@ -7,7 +7,6 @@
 
 @MainActor
 protocol RootContainer {
-    func makeAppStateManager() -> OnboardingStateInterface
     func makeOnboardingAssembly() -> OnboardingAssembly
     func makeMainAssembly() -> MainAssembly
 }
@@ -22,7 +21,6 @@ final class RootAssembly {
     }
     
     func view() -> RootScreen<RootViewModelImpl> {
-        RootScreen(vm: RootViewModelImpl(router: RootRouterImpl(container: self.container),
-                                         onbStateManager: self.container.makeAppStateManager()))
+        RootScreen(vm: RootViewModelImpl(router: RootRouterImpl(container: self.container)))
     }
 }

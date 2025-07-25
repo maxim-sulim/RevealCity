@@ -36,9 +36,9 @@ enum Constants {
             }
         }
         
-        var center: (x: Int, y: Int) {
+        var center: GridPoint {
             switch self {
-            case .map: (x: gridWidth / 2, y: gridHeight / 2)
+            case .map: .init(x: gridWidth / 2, y: gridHeight / 2)
             }
         }
     }

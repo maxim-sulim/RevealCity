@@ -18,13 +18,7 @@ struct MainScreen<ViewModel: MainViewModel>: View {
     
     var body: some View {
         ZStack {
-            GeometryReader { proxy in
-                map
-                    .onAppear {
-                        vm.dispatch(.updateGrid(proxy.size))
-                    }
-            }
-            
+            map
             fogLayer
         }
         .safeAreaInset(edge: .bottom) {

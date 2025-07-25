@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TileView: View {
-    let tile: Tile
+    let tile: Cell
     let isPlayerHere: Bool
 
     @State private var fogAlpha: Double = 1.0
