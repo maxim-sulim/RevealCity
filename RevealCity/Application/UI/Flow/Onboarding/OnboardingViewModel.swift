@@ -118,13 +118,16 @@ final class OnboardingViewModelImpl: OnboardingViewModelInterface {
     }
    
     private func nextTapped() {
-        switch currentPage {
-        case .page1:
-            currentPage = .page2
-        case .page2:
-            currentPage = .page3
-        case .page3:
-            onboardingComplated()
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            switch currentPage {
+            case .page1:
+                currentPage = .page2
+            case .page2:
+                currentPage = .page3
+            case .page3:
+                onboardingComplated()
+            }
         }
     }
     

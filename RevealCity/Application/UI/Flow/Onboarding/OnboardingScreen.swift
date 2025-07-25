@@ -34,7 +34,7 @@ struct OnboardingScreen<ViewModel: OnboardingViewModelInterface>: View {
                         .padding(.horizontal, 24)
                 }
             }
-            .animation(.default, value: vm.currentPage)
+            .animation(.easeInOut(duration: 0.2), value: vm.currentPage)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.vertical, 40)
             .safeAreaInset(edge: .bottom) {

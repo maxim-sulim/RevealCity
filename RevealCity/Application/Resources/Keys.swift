@@ -15,5 +15,6 @@ enum Keys {
     
     enum Storage: String {
         case exploration
+        case onboardingKey = "ONBOSRDING_PRESENTED"
     }
 }

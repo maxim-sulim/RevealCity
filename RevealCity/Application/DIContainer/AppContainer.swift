@@ -14,7 +14,7 @@ final class AppContainer: ObservableObject {
     private let isPreview: Bool
     
     private let locationService: LocationService
-    private let explorationManager: ExplorationManager
+    private let explorationManager: ExplorationObserver
     
     init(isPreview: Bool = false) {
         self.isPreview = isPreview
@@ -25,7 +25,7 @@ final class AppContainer: ObservableObject {
         
         explorationManager = isPreview
         ? ExplorationMock()
-        : ExplorationManagerImpl(locationService: locationService,
+        : ExplorationObserverImpl(locationService: locationService,
                                  keychainService: .init(),
                                  logger: LoggerManagerImpl(configuration: .explorationManager))
     }
@@ -79,7 +79,7 @@ extension AppContainer: OnboardingContainer {
 }
 
 extension AppContainer: MainContainer {
-    func makeExplorationMaanger() -> any ExplorationManager {
+    func makeExplorationMaanger() -> any ExplorationObserver {
         explorationManager
     }
 }

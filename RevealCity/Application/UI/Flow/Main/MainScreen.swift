@@ -19,7 +19,7 @@ struct MainScreen<ViewModel: MainViewModel>: View {
     var body: some View {
         ZStack {
             map
-                .ignoresSafeArea()
+            fogLayer
         }
         .safeAreaInset(edge: .bottom) {
             currentLocationButton
@@ -35,6 +35,7 @@ struct MainScreen<ViewModel: MainViewModel>: View {
     
     private var map: some View {
         YandexMapView(model: vm)
+            .allowsHitTesting(false)
     }
     
     private var currentLocationButton: some View {
@@ -55,6 +56,10 @@ struct MainScreen<ViewModel: MainViewModel>: View {
         Text("Explored: \(vm.exploredPercent.trunc(2))")
             .font(.title3)
             .foregroundColor(.accent)
+    }
+    
+    private var fogLayer: some View {
+        FogOfWarView(model: vm)
     }
 }
 

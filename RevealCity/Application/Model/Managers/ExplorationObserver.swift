@@ -13,11 +13,13 @@ private struct CityBounds {
     let totalArea: Double = 50_000_000.0
 }
 
-protocol ExplorationManager {
+protocol ExplorationObserver {
     var explorationDataPublished: AnyPublisher<ExplorationData, Never> { get }
+    
+    func getExploredData() -> ExplorationData
 }
 
-final class ExplorationManagerImpl: ExplorationManager {
+final class ExplorationObserverImpl: ExplorationObserver {
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -42,7 +44,17 @@ final class ExplorationManagerImpl: ExplorationManager {
         self.keychainService = keychainService
         self.logger = logger
         
+        fetchData()
         bind()
+    }
+    
+    private func fetchData() {
+        do {
+            explorationData = try keychainService.getObject(forKey: Keys.Storage.exploration.rawValue,
+                                                            castTo: ExplorationData.self)
+        } catch {
+            logger.log("Error: \(error.localizedDescription)")
+        }
     }
     
     private func bind() {
@@ -65,7 +77,7 @@ final class ExplorationManagerImpl: ExplorationManager {
         
         currentLocation = locationPoint
         
-        if location.horizontalAccuracy < 50 {
+        if location.horizontalAccuracy < explorationRadius {
             addExploredArea(at: locationPoint)
         }
     }
@@ -103,5 +115,11 @@ final class ExplorationManagerImpl: ExplorationManager {
         } catch let error {
             logger.log("Error: \(error.localizedDescription)")
         }
+    }
+}
+
+extension ExplorationObserverImpl {
+    func getExploredData() -> ExplorationData {
+        explorationData
     }
 }

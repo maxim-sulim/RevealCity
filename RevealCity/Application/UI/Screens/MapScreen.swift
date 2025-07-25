@@ -23,5 +23,5 @@ struct YandexMapView<Model: YandexMapModel>: UIViewRepresentable {
         model.mapView ?? YMKMapView(frame: CGRect.zero)
     }
     
-    func updateUIView(_ mapView: YMKMapView, context: Context) {}
+    func updateUIView(_ mapView: YMKMapView, context: Context) { }
 }
