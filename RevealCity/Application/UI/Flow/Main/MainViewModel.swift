@@ -35,7 +35,7 @@ final class MainViewModelImpl: MainViewModel {
     private let locationService: LocationService
     private let explorationMaanger: ExplorationObserver
     
-    private var fogUpdater: FogOfWarUpdater = .init()
+    private var fogManager: FogMapManager
     private var cancellables = Set<AnyCancellable>()
     
     private var currentLocation: CLLocation?
@@ -44,14 +44,16 @@ final class MainViewModelImpl: MainViewModel {
     @Published var mapView = YMKMapView(frame: CGRect.zero)
     @Published var exploredPercent: Double = 0
     @Published var cells: [[Cell]] = []
-    @Published var playerPosition: GridPoint = Constants.Size.map.center
+    @Published var playerPosition: GridPoint = Constants.SizeMap.center
     
     init(coordinator: MainCoordinatorDelegate,
          locationService: LocationService,
-         explorationMaanger: ExplorationObserver) {
+         explorationMaanger: ExplorationObserver,
+         fogManager: FogMapManager) {
         self.coordinator = coordinator
         self.locationService = locationService
         self.explorationMaanger = explorationMaanger
+        self.fogManager = fogManager
         
         bind()
     }
@@ -95,7 +97,7 @@ final class MainViewModelImpl: MainViewModel {
         }
     }
     
-    private func fetchExploredArea() {
+    private func updateExploredArea() {
         let explorationData = explorationMaanger.getExploredData()
         guard let mapWindow = mapView?.mapWindow else { return }
         
@@ -105,7 +107,7 @@ final class MainViewModelImpl: MainViewModel {
         guard let mapBottomRight = mapWindow.screenToWorld(with: screenMax),
               let mapTopLeft = mapWindow.screenToWorld(with: screenMin) else { return }
         
-        fogUpdater.fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
+        fogManager.fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
                                             mapTopLeft: .init(latitude: mapTopLeft.latitude,
                                                               longitude: mapTopLeft.longitude),
                                             mapBottomRight: .init(latitude: mapBottomRight.latitude,
@@ -123,7 +125,7 @@ final class MainViewModelImpl: MainViewModel {
     
     private func moveMapToCenter() {
         if let myLocation = currentLocation, let map = mapView {
-            playerPosition = Constants.Size.map.center
+            playerPosition = Constants.SizeMap.center
             setCenterMapLocation(target: YMKPoint(latitude: myLocation.coordinate.latitude,
                                                   longitude: myLocation.coordinate.longitude),
                                  map: map)
@@ -135,14 +137,14 @@ final class MainViewModelImpl: MainViewModel {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             await MainActor.run {
                 moveMapToCenter()
-                fetchExploredArea()
+                updateExploredArea()
             }
         }
     }
     
     private func updateFog(from position: GridPoint) {
-        fogUpdater.updateFog(from: position, radius: 2)
-        cells = fogUpdater.cells
+        fogManager.updateFog(from: position, radius: 2)
+        cells = fogManager.cells
     }
     
     private func calculateMovePlayerPosition() throws -> GridPoint {
@@ -160,8 +162,8 @@ final class MainViewModelImpl: MainViewModel {
             throw URLError(.unknown)
         }
         
-        let worldDx = (worldMax.longitude - worldMin.longitude) / 12.0
-        let worldDy = (worldMax.latitude - worldMin.latitude) / 14.0
+        let worldDx = (worldMax.longitude - worldMin.longitude) / Double(Constants.SizeMap.cellSize)
+        let worldDy = (worldMax.latitude - worldMin.latitude) / Double(Constants.SizeMap.cellSize)
         
         guard worldDx != 0 && worldDy != 0 else {
             throw URLError(.unknown)
@@ -183,6 +185,7 @@ extension MainViewModelImpl {
             onAppear()
         case .currentLocationTapped:
             moveMapToCenter()
+            updateExploredArea()
         }
     }
 }
@@ -191,8 +194,8 @@ extension MainViewModelImpl {
 extension MainViewModelImpl {
     
     func movePlayer(dx: Int, dy: Int) {
-        let newX = max(0, min(fogUpdater.xCount - 1, playerPosition.x + dx))
-        let newY = max(0, min(fogUpdater.yCount - 1, playerPosition.y + dy))
+        let newX = max(0, min(fogManager.xCount - 1, playerPosition.x + dx))
+        let newY = max(0, min(fogManager.yCount - 1, playerPosition.y + dy))
         playerPosition = .init(x: newX, y: newY)
     }
 }

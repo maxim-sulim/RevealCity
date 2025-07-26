@@ -9,6 +9,7 @@
 protocol MainContainer {
     func makeLocationService() -> any LocationService
     func makeExplorationMaanger() -> ExplorationObserver
+    func makeFogManager() -> FogMapManager
 }
 
 @MainActor

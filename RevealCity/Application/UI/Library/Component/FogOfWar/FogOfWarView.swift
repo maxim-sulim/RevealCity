@@ -19,10 +19,10 @@ protocol FogOfWarModel: ObservableObject {
 struct FogOfWarView<Model: FogOfWarModel>: View {
     
     @ObservedObject var model: Model
-
+    
     var body: some View {
-        GridTilesView(tiles: model.cells,
-                playerPosition: model.playerPosition)
+        GridCellsView(cells: model.cells,
+                      playerPosition: model.playerPosition)
     }
 }
 

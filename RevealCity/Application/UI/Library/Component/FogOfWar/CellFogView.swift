@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct TileView: View {
-    let tile: Cell
+struct CellFogView: View {
+    let cell: Cell
     let isPlayerHere: Bool
+    let cellSize: CGFloat = CGFloat(Constants.SizeMap.cellSize)
 
     @State private var fogAlpha: Double = 1.0
 
@@ -23,17 +24,17 @@ struct TileView: View {
                 .fill(Color.black)
                 .opacity(fogAlpha)
         }
-        .frame(width: 12, height: 12)
+        .frame(width: cellSize, height: cellSize)
         .onAppear {
             updateFogAlpha()
         }
-        .onChange(of: tile.fog) { _ in
+        .onChange(of: cell.fog) { _ in
             updateFogAlpha()
         }
     }
 
     private func updateFogAlpha() {
-        switch tile.fog {
+        switch cell.fog {
         case .unseen:
             fogAlpha = 0.6
         case .seen:

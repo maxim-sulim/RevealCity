@@ -9,37 +9,15 @@ import UIKit
 
 enum Constants {
     
-    enum Size {
-        case map
+    enum SizeMap {
+        static let cellSize = 12
         
-        var width: CGFloat {
-            switch self {
-            case .map: CGFloat(self.gridWidth) * 12
-            }
-        }
+        static let width: CGFloat = CGFloat(Int(cellXCount) * cellSize)
+        static let height: CGFloat = CGFloat(Int(cellYCount) * cellSize)
         
-        var height: CGFloat {
-            switch self {
-            case .map: CGFloat(self.gridHeight) * 14
-            }
-        }
+        static let cellXCount: Int = Int((UIScreen.main.bounds.width - 20) / CGFloat(cellSize))
+        static let cellYCount: Int = Int((UIScreen.main.bounds.height - 150) / CGFloat(cellSize))
         
-        var gridWidth: Int {
-            switch self {
-            case .map: Int(UIScreen.main.bounds.width / 12)
-            }
-        }
-        
-        var gridHeight: Int {
-            switch self {
-            case .map: Int(UIScreen.main.bounds.height / 14)
-            }
-        }
-        
-        var center: GridPoint {
-            switch self {
-            case .map: .init(x: gridWidth / 2, y: gridHeight / 2)
-            }
-        }
+        static let center: GridPoint = .init(x: cellXCount / 2, y: cellYCount / 2)
     }
 }
