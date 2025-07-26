@@ -26,7 +26,6 @@ struct MainScreen<ViewModel: MainViewModel>: View {
         }
         .safeAreaInset(edge: .top, content: {
             exploredLabel
-                .padding(.top)
         })
         .onAppear {
             vm.dispatch(.onAppear)
@@ -35,6 +34,7 @@ struct MainScreen<ViewModel: MainViewModel>: View {
     
     private var map: some View {
         YandexMapView(model: vm)
+            .frame(width: Constants.SizeMap.width, height: Constants.SizeMap.height)
             .allowsHitTesting(false)
     }
     
@@ -48,12 +48,11 @@ struct MainScreen<ViewModel: MainViewModel>: View {
                 .frame(width: 48, height: 48)
                 .background(.accent)
                 .clipShape(Circle())
-                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
         }
     }
     
     private var exploredLabel: some View {
-        Text("Explored: \(vm.exploredPercent.trunc(2))")
+        Text("Explored: \(vm.exploredPercent.trunc(2))%")
             .font(.title3)
             .foregroundColor(.accent)
     }
@@ -67,6 +66,7 @@ struct MainScreen<ViewModel: MainViewModel>: View {
     let router = MainRouter(container: AppContainer(isPreview: true))
     let vm = MainViewModelImpl(coordinator: router,
                                locationService: LocationSerivceMock(),
-                               explorationMaanger: ExplorationMock())
+                               explorationMaanger: ExplorationMock(),
+                               fogManager: FogMapManagerImpl())
     MainScreen(vm: vm)
 }

@@ -79,6 +79,12 @@ extension AppContainer: OnboardingContainer {
 }
 
 extension AppContainer: MainContainer {
+    func makeFogManager() -> any FogMapManager {
+        getWeak {
+            FogMapManagerImpl()
+        }
+    }
+    
     func makeExplorationMaanger() -> any ExplorationObserver {
         explorationManager
     }

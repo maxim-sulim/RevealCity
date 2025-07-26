@@ -19,11 +19,11 @@ final class MainRouter: ObservableObject {
     
     @Published var routes: Routes<MainLink> = []
     
-    
     func makeRootScreen() -> MainScreen<MainViewModelImpl> {
         MainScreen(vm: MainViewModelImpl(coordinator: self,
                                          locationService: self.container.makeLocationService(),
-                                         explorationMaanger: self.container.makeExplorationMaanger()))
+                                         explorationMaanger: self.container.makeExplorationMaanger(),
+                                         fogManager: self.container.makeFogManager()))
     }
 }
 

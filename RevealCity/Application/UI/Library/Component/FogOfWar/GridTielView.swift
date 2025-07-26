@@ -7,24 +7,24 @@
 
 import SwiftUI
 
-struct GridTilesView: View {
+struct GridCellsView: View {
     
-    var tiles: [[Cell]]
+    var cells: [[Cell]]
     var playerPosition: GridPoint
 
     var body: some View {
         VStack(spacing: .zero) {
-            ForEach(tiles, id: \.self) { row in
+            ForEach(cells, id: \.self) { row in
                 HStack(spacing: .zero) {
-                    ForEach(row) { tile in
-                        TileView(tile: tile, isPlayerHere: isPlayer(tile))
+                    ForEach(row) { cell in
+                        CellFogView(cell: cell, isPlayerHere: isPlayer(cell))
                     }
                 }
             }
         }
     }
 
-    private func isPlayer(_ tile: Cell) -> Bool {
-        tile.point.x == playerPosition.x && tile.point.y == playerPosition.y
+    private func isPlayer(_ cell: Cell) -> Bool {
+        cell.point.x == playerPosition.x && cell.point.y == playerPosition.y
     }
 }
