@@ -1,0 +1,19 @@
+//
+//  GridPoint.swift
+//  RevealCity
+//
+//  Created by Максим Сулим on 26.07.2025.
+//
+
+import Foundation
+
+struct GridPoint: Hashable {
+    let x: Int
+    let y: Int
+}
+
+struct Cell: Identifiable, Hashable {
+    let id = UUID()
+    let point: GridPoint
+    var fog: FogState = .unseen
+}

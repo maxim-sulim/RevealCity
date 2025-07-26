@@ -10,24 +10,21 @@ import CoreLocation
 
 typealias Coordinate = (x: Double, y: Double)
 
-enum FogState {
-    case unseen
-    case seen
-    case visible
+protocol FogMapManager {
+    var xCount: Int { get }
+    var yCount: Int { get }
+    var cells: [[Cell]] { get }
+    
+    func updateFog(from position: GridPoint, radius: Int)
+    
+    func fillingCoveredGridPoints(
+        exploredAreas: [ExploredArea],
+        mapTopLeft: CLLocationCoordinate2D,
+        mapBottomRight: CLLocationCoordinate2D,
+    )
 }
 
-struct GridPoint: Hashable {
-    let x: Int
-    let y: Int
-}
-
-struct Cell: Identifiable, Hashable {
-    let id = UUID()
-    let point: GridPoint
-    var fog: FogState = .unseen
-}
-
-final class FogOfWarUpdater {
+final class FogMapManagerImpl: FogMapManager {
     
     private var coordinate: Coordinate
     
@@ -35,10 +32,10 @@ final class FogOfWarUpdater {
     var yCount: Int
     var cells: [[Cell]]
     
-    init(xCount: Int = Constants.Size.map.gridWidth,
-         yCount: Int = Constants.Size.map.gridHeight,
-         coordinate: (x: Double, y: Double) = (x: Double(Constants.Size.map.center.x),
-                                               y: Double(Constants.Size.map.center.y))) {
+    init(xCount: Int = Constants.SizeMap.cellXCount,
+         yCount: Int = Constants.SizeMap.cellYCount,
+         coordinate: (x: Double, y: Double) = (x: Double(Constants.SizeMap.center.x),
+                                               y: Double(Constants.SizeMap.center.y))) {
         self.coordinate = coordinate
         self.xCount = xCount
         self.yCount = yCount
@@ -68,20 +65,19 @@ final class FogOfWarUpdater {
     func fillingCoveredGridPoints(
         exploredAreas: [ExploredArea],
         mapTopLeft: CLLocationCoordinate2D,
-        mapBottomRight: CLLocationCoordinate2D,
-        gridSizeX: Int = 12,
-        gridSizeY: Int = 14
+        mapBottomRight: CLLocationCoordinate2D
     ) {
+        let gridSize = Constants.SizeMap.cellSize
         var coveredPoints = Set<(GridPoint)>()
 
-        let cellWidth = (mapBottomRight.longitude - mapTopLeft.longitude) / Double(gridSizeX)
-        let cellHeight = (mapTopLeft.latitude - mapBottomRight.latitude) / Double(gridSizeY)
+        let cellWidth = (mapBottomRight.longitude - mapTopLeft.longitude) / Double(gridSize)
+        let cellHeight = (mapTopLeft.latitude - mapBottomRight.latitude) / Double(gridSize)
         
         for area in exploredAreas {
             let center = area.centerPoint.coordinate
 
-            for x in 0..<gridSizeX {
-                for y in 0..<gridSizeY {
+            for x in 0..<gridSize {
+                for y in 0..<gridSize {
                     let cellCenterLat = mapTopLeft.latitude - (Double(y) + 0.5) * cellHeight
                     let cellCenterLon = mapTopLeft.longitude + (Double(x) + 0.5) * cellWidth
                     
