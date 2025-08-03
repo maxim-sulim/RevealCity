@@ -78,7 +78,7 @@ final class LocationServiceImpl: NSObject, LocationService {
             
             if CLLocationManager.locationServicesEnabled() {
                 locationManager.delegate = self
-                locationManager.distanceFilter = 5
+                locationManager.distanceFilter = 2
                 locationManager.startUpdatingLocation()
                 handleLocationStatus(locationManager.authorizationStatus)
             } else {

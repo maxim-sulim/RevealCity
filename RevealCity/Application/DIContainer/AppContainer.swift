@@ -81,7 +81,8 @@ extension AppContainer: OnboardingContainer {
 extension AppContainer: MainContainer {
     func makeFogManager() -> any FogMapManager {
         getWeak {
-            FogMapManagerImpl()
+            FogMapManagerImpl(locationService: locationService,
+                              explorationMaanger: explorationManager)
         }
     }
     

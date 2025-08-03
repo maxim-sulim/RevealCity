@@ -65,8 +65,8 @@ struct MainScreen<ViewModel: MainViewModel>: View {
 #Preview {
     let router = MainRouter(container: AppContainer(isPreview: true))
     let vm = MainViewModelImpl(coordinator: router,
-                               locationService: LocationSerivceMock(),
                                explorationMaanger: ExplorationMock(),
-                               fogManager: FogMapManagerImpl())
+                               locationService: LocationSerivceMock(),
+                               fogManager: FogManagerMock())
     MainScreen(vm: vm)
 }

@@ -12,8 +12,6 @@ import SwiftUI
 protocol FogOfWarModel: ObservableObject {
     var cells: [[Cell]] { get }
     var playerPosition: GridPoint { get }
-    
-    func movePlayer(dx: Int, dy: Int)
 }
 
 struct FogOfWarView<Model: FogOfWarModel>: View {
