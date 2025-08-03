@@ -94,6 +94,7 @@ final class MainViewModelImpl: MainViewModel {
     
     private func moveMapToCenter() {
         if let myLocation = currentLocation, let map = mapView {
+            fogManager.setPositionToCenter()
             setCenterMapLocation(target: YMKPoint(latitude: myLocation.coordinate.latitude,
                                                   longitude: myLocation.coordinate.longitude),
                                  map: map)

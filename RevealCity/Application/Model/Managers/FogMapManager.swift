@@ -9,6 +9,7 @@ protocol FogMapManager {
     var playerPositionPublisher: AnyPublisher<GridPoint, Never> { get }
     
     func start(subscribe: AnyPublisher<YMKMapView?, Never>)
+    func setPositionToCenter()
 }
 
 final class FogMapManagerImpl: FogMapManager {
@@ -24,7 +25,7 @@ final class FogMapManagerImpl: FogMapManager {
     
     @Published private var map: YMKMapView?
     @Published private var cells: [[Cell]] = []
-    @Published private var playerPosition: GridPoint = Constants.SizeMap.center
+    @Published private var playerPosition: GridPoint = .center
     
     var cellsPublisher: AnyPublisher<[[Cell]], Never> {
         $cells.eraseToAnyPublisher()
@@ -45,7 +46,6 @@ final class FogMapManagerImpl: FogMapManager {
     
     private func bind() {
         locationService.currentLocationPublisher
-            .receive(on: RunLoop.main)
             .sink { [weak self] location in
                 guard let self, let location = location else { return }
                 guard location != self.lastLocation else { return }
@@ -54,12 +54,17 @@ final class FogMapManagerImpl: FogMapManager {
             .store(in: &cancellables)
         
         $playerPosition
-            .receive(on: RunLoop.main)
             .sink { [weak self] newPosition in
                 self?.updateFog(from: newPosition)
             }
             .store(in: &cancellables)
         
+        $map
+            .sink { map in
+                guard let map = map else { return }
+                print("UPDATE MAP")
+            }
+            .store(in: &cancellables)
     }
     
     private func setup() {
@@ -198,5 +203,9 @@ extension FogMapManagerImpl {
     
     func start(subscribe: AnyPublisher<YMKMapView?, Never>)  {
         subscribe.assign(to: &$map)
+    }
+    
+    func setPositionToCenter() {
+        playerPosition = .center
     }
 }
