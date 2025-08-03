@@ -1,11 +1,3 @@
-//
-//  MainViewModel.swift
-//  RevealCity
-//
-//  Created by Максим Сулим on 23.06.2025.
-//
-
-import Foundation
 import SwiftUI
 import YandexMapsMobile
 import CoreLocation
@@ -47,18 +39,27 @@ final class MainViewModelImpl: MainViewModel {
     @Published var playerPosition: GridPoint = Constants.SizeMap.center
     
     init(coordinator: MainCoordinatorDelegate,
-         locationService: LocationService,
          explorationMaanger: ExplorationObserver,
+         locationService: LocationService,
          fogManager: FogMapManager) {
         self.coordinator = coordinator
-        self.locationService = locationService
         self.explorationMaanger = explorationMaanger
+        self.locationService = locationService
         self.fogManager = fogManager
         
         bind()
+        fogManager.start(subscribe: $mapView.eraseToAnyPublisher())
     }
     
     private func bind() {
+        fogManager.playerPositionPublisher
+            .receive(on: RunLoop.main)
+            .assign(to: &$playerPosition)
+        
+        fogManager.cellsPublisher
+            .receive(on: RunLoop.main)
+            .assign(to: &$cells)
+        
         locationService.currentLocationPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] location in
@@ -68,51 +69,19 @@ final class MainViewModelImpl: MainViewModel {
             }
             .store(in: &cancellables)
         
+        
         explorationMaanger.explorationDataPublished
             .receive(on: RunLoop.main)
             .map { $0.explorationPercentage }
             .assign(to: &$exploredPercent)
-        
-        $playerPosition
-            .receive(on: RunLoop.main)
-            .sink { [weak self] newPosition in
-                self?.updateFog(from: newPosition)
-            }
-            .store(in: &cancellables)
     }
     
     private func locationUpdate(location: CLLocation) {
         if lastLocation == nil {
             lastLocation = location
         }
+        self.lastLocation = currentLocation
         self.currentLocation = location
-        
-        do {
-            let newPosition = try calculateMovePlayerPosition()
-            
-            movePlayer(dx: newPosition.x, dy: newPosition.y)
-            self.lastLocation = currentLocation
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-    
-    private func updateExploredArea() {
-        let explorationData = explorationMaanger.getExploredData()
-        guard let mapWindow = mapView?.mapWindow else { return }
-        
-        let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
-        let screenMin = YMKScreenPoint(x: 0, y: 0)
-        
-        guard let mapBottomRight = mapWindow.screenToWorld(with: screenMax),
-              let mapTopLeft = mapWindow.screenToWorld(with: screenMin) else { return }
-        
-        fogManager.fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
-                                            mapTopLeft: .init(latitude: mapTopLeft.latitude,
-                                                              longitude: mapTopLeft.longitude),
-                                            mapBottomRight: .init(latitude: mapBottomRight.latitude,
-                                                                  longitude: mapBottomRight.longitude))
-        
     }
     
     private func setCenterMapLocation(target location: YMKPoint?, map: YMKMapView) {
@@ -125,7 +94,6 @@ final class MainViewModelImpl: MainViewModel {
     
     private func moveMapToCenter() {
         if let myLocation = currentLocation, let map = mapView {
-            playerPosition = Constants.SizeMap.center
             setCenterMapLocation(target: YMKPoint(latitude: myLocation.coordinate.latitude,
                                                   longitude: myLocation.coordinate.longitude),
                                  map: map)
@@ -137,42 +105,8 @@ final class MainViewModelImpl: MainViewModel {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             await MainActor.run {
                 moveMapToCenter()
-                updateExploredArea()
             }
         }
-    }
-    
-    private func updateFog(from position: GridPoint) {
-        fogManager.updateFog(from: position, radius: 2)
-        cells = fogManager.cells
-    }
-    
-    private func calculateMovePlayerPosition() throws -> GridPoint {
-        guard let mapWindow = mapView?.mapWindow,
-              let currentLocation = currentLocation,
-              let lastLocation = lastLocation else {
-            throw URLError(.unknown)
-        }
-        
-        let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
-        let screenMin = YMKScreenPoint(x: 0, y: 0)
-        
-        guard let worldMax = mapWindow.screenToWorld(with: screenMax),
-              let worldMin = mapWindow.screenToWorld(with: screenMin) else {
-            throw URLError(.unknown)
-        }
-        
-        let worldDx = (worldMax.longitude - worldMin.longitude) / Double(Constants.SizeMap.cellSize)
-        let worldDy = (worldMax.latitude - worldMin.latitude) / Double(Constants.SizeMap.cellSize)
-        
-        guard worldDx != 0 && worldDy != 0 else {
-            throw URLError(.unknown)
-        }
-        
-        let dx = Int((currentLocation.coordinate.longitude - lastLocation.coordinate.longitude) / worldDx)
-        let dy = Int((currentLocation.coordinate.latitude - lastLocation.coordinate.latitude) / worldDy)
-        
-        return .init(x: dx, y: dy)
     }
 }
 
@@ -185,17 +119,6 @@ extension MainViewModelImpl {
             onAppear()
         case .currentLocationTapped:
             moveMapToCenter()
-            updateExploredArea()
         }
-    }
-}
-
-//MARK: delegate FogOfWarModel
-extension MainViewModelImpl {
-    
-    func movePlayer(dx: Int, dy: Int) {
-        let newX = max(0, min(fogManager.xCount - 1, playerPosition.x + dx))
-        let newY = max(0, min(fogManager.yCount - 1, playerPosition.y + dy))
-        playerPosition = .init(x: newX, y: newY)
     }
 }
