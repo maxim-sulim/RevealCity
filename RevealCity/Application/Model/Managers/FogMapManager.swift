@@ -58,13 +58,6 @@ final class FogMapManagerImpl: FogMapManager {
                 self?.updateFog(from: newPosition)
             }
             .store(in: &cancellables)
-        
-        $map
-            .sink { map in
-                guard let map = map else { return }
-                print("UPDATE MAP")
-            }
-            .store(in: &cancellables)
     }
     
     private func setup() {
@@ -83,13 +76,15 @@ final class FogMapManagerImpl: FogMapManager {
         if lastLocation == nil {
             lastLocation = location
         }
-        self.currentLocation = location
+        currentLocation = location
         
         do {
             let newPosition = try calculateMovePlayerPosition()
             
-            movePlayer(dx: newPosition.x, dy: newPosition.y)
-            self.lastLocation = currentLocation
+            if newPosition.x > 0 || newPosition.y > 0 {
+                movePlayer(dx: newPosition.x, dy: newPosition.y)
+                lastLocation = currentLocation
+            }
         } catch {
             print(error.localizedDescription)
         }
@@ -145,22 +140,26 @@ final class FogMapManagerImpl: FogMapManager {
         }
     }
     
-    private func updateExploredArea() {
-        let explorationData = explorationMaanger.getExploredData()
+    
+    private func updateExploredArea()  {
         guard let mapWindow = map?.mapWindow else { return }
         
-        let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
-        let screenMin = YMKScreenPoint(x: 0, y: 0)
-        
-        guard let mapBottomRight = mapWindow.screenToWorld(with: screenMax),
-              let mapTopLeft = mapWindow.screenToWorld(with: screenMin) else { return }
-        
-        fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
-                                 mapTopLeft: .init(latitude: mapTopLeft.latitude,
-                                                   longitude: mapTopLeft.longitude),
-                                 mapBottomRight: .init(latitude: mapBottomRight.latitude,
-                                                       longitude: mapBottomRight.longitude))
-        
+        Task { @MainActor in
+            let explorationData = explorationMaanger.getExploredData()
+            
+            await MainActor.run {
+                let screenMax = YMKScreenPoint(x: Float(mapWindow.width()), y: Float(mapWindow.height()))
+                let screenMin = YMKScreenPoint(x: 0, y: 0)
+                guard let mapBottomRight = mapWindow.screenToWorld(with: screenMax),
+                      let mapTopLeft = mapWindow.screenToWorld(with: screenMin) else { return }
+                
+                fillingCoveredGridPoints(exploredAreas: explorationData.exploredAreas,
+                                         mapTopLeft: .init(latitude: mapTopLeft.latitude,
+                                                           longitude: mapTopLeft.longitude),
+                                         mapBottomRight: .init(latitude: mapBottomRight.latitude,
+                                                               longitude: mapBottomRight.longitude))
+            }
+        }
     }
     
     private func calculateMovePlayerPosition() throws -> GridPoint {
@@ -206,6 +205,10 @@ extension FogMapManagerImpl {
     }
     
     func setPositionToCenter() {
-        playerPosition = .center
+        Task(priority: .userInitiated) {
+            playerPosition = .center
+            updateFog(from: .center)
+            updateExploredArea()
+        }
     }
 }
