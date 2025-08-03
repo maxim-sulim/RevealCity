@@ -1,10 +1,3 @@
-//
-//  MainScreen.swift
-//  RevealCity
-//
-//  Created by Максим Сулим on 23.06.2025.
-//
-
 import SwiftUI
 import MapKit
 

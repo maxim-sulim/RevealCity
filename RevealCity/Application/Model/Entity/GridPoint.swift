@@ -17,3 +17,7 @@ struct Cell: Identifiable, Hashable {
     let point: GridPoint
     var fog: FogState = .unseen
 }
+
+extension GridPoint {
+    static let center = Constants.SizeMap.center
+}
