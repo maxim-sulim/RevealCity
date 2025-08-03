@@ -26,8 +26,8 @@ final class MainViewModelImpl: MainViewModel {
     private let coordinator: MainCoordinatorDelegate
     private let locationService: LocationService
     private let explorationMaanger: ExplorationObserver
+    private let fogManager: FogMapManager
     
-    private var fogManager: FogMapManager
     private var cancellables = Set<AnyCancellable>()
     
     private var currentLocation: CLLocation?

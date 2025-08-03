@@ -10,6 +10,10 @@ import Combine
 import YandexMapsMobile
 
 final class FogManagerMock: FogMapManager {
+    func setPositionToCenter() {
+        
+    }
+    
     var cellsPublisher: AnyPublisher<[[Cell]], Never> {
         $cells.eraseToAnyPublisher()
     }
@@ -29,6 +33,4 @@ final class FogManagerMock: FogMapManager {
     func start(subscribe: AnyPublisher<YMKMapView?, Never>) {
         
     }
-    
-    
 }
