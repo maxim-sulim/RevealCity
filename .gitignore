@@ -1,0 +1,50 @@
+# Xcode
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcscmblueprint
+
+# User data
+*.xcuserdatad
+*.swp
+*.lock
+*.DS_Store
+
+# Logs
+*.log
+
+# Build products
+build/
+*.app
+*.ipa
+*.dSYM
+
+# SwiftPM
+.build/
+Packages/
+.swiftpm/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/
+
+# Tuist
+Tuist/Dependencies/
+Tuist/Generated/
+Project.swift
+Setup.swift
+
+# Fastlane
+fastlane/report.xml
+fastlane/screenshots
+fastlane/test_output
+
+# Xcode Preview cache
+*.preview-thumbnails
+
+# Other
+*.orig
+*.rej
