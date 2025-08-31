@@ -1,0 +1,1 @@
+typealias LocationServices = LocationService & LocationPermissionService
