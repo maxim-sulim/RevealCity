@@ -44,6 +44,9 @@ struct OnboardingScreen<ViewModel: OnboardingViewModelInterface>: View {
             .opacity(vm.isShowPermissionView ? 1 : 0)
             .transition(.opacity)
         }
+        .onAppear {
+            vm.dispatch(.onAppear)
+        }
     }
     
     @ViewBuilder
